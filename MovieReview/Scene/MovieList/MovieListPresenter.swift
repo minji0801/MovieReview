@@ -12,26 +12,28 @@ protocol MovieListProtocol: AnyObject {
     func setupSearchBar()
     func setupViews()
     func updateSearchTableView(isHidden: Bool)
+    func pushToMovieViewController(with movie: Movie)
+    func updateCollectionView()
 }
 
 final class MovieListPresenter: NSObject {
     private weak var viewController: MovieListProtocol? // weak var와 unowned let을 사용했을 때 memory leak에 대한 것!
 
+    private let userDefaultsManager: UserDefaultsManagerProtocol
+
     private let movieSearchManager: MovieSearchManagerProtocol
 
-    private var likedMovie: [Movie] = [
-        Movie(title: "Starwars", imageURL: "", userRating: "5.0", actor: "ABC", director: "ABC", pubDate: "2022"),
-        Movie(title: "Starwars", imageURL: "", userRating: "5.0", actor: "ABC", director: "ABC", pubDate: "2022"),
-        Movie(title: "Starwars", imageURL: "", userRating: "5.0", actor: "ABC", director: "ABC", pubDate: "2022")
-    ]
-    
+    private var likedMovie: [Movie] = []
+
     private var currentMovieSearchResult: [Movie] = []
 
     init(
         viewController: MovieListProtocol,
+        userDefaultsManager: UserDefaultsManagerProtocol = UserDefaultsManager(),
         movieSearchManager: MovieSearchManagerProtocol = MovieSearchManager()
     ) {
         self.viewController = viewController
+        self.userDefaultsManager = userDefaultsManager
         self.movieSearchManager = movieSearchManager
     }
 
@@ -39,6 +41,11 @@ final class MovieListPresenter: NSObject {
         viewController?.setupNavigationBar()
         viewController?.setupSearchBar()
         viewController?.setupViews()
+    }
+
+    func viewWillApear() {
+        likedMovie = userDefaultsManager.getMovies()
+        viewController?.updateCollectionView()
     }
 }
 
@@ -86,6 +93,11 @@ extension MovieListPresenter: UICollectionViewDelegateFlowLayout {
         let inset: CGFloat = 16.0
         return UIEdgeInsets(top: inset, left: inset, bottom: inset, right: inset)
     }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let movie = likedMovie[indexPath.item]
+        viewController?.pushToMovieViewController(with: movie)
+    }
 }
 
 extension MovieListPresenter: UICollectionViewDataSource {
@@ -111,7 +123,10 @@ extension MovieListPresenter: UICollectionViewDataSource {
 
 // MARK: UITableViewDelegate
 extension MovieListPresenter: UITableViewDelegate {
-    //
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let movie = currentMovieSearchResult[indexPath.row]
+        viewController?.pushToMovieViewController(with: movie)
+    }
 }
 
 extension MovieListPresenter: UITableViewDataSource {
