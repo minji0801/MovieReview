@@ -32,6 +32,7 @@ final class MovieListViewController: UIViewController {
         let tableView = UITableView()
         tableView.dataSource = presenter
         tableView.delegate = presenter
+        tableView.backgroundColor = .systemBackground
 
         return tableView
     }()
