@@ -42,4 +42,23 @@ class MovieReviewUITests: XCTestCase {
         let existSearchBarCancelButton = navigationBar.buttons["Cancel"].exists
         XCTAssertTrue(existSearchBarCancelButton)
     }
+
+    // BDD
+    func test_영화가_즐겨찾기_되어있으면 () {
+        let existsCell = app.collectionViews
+            .cells
+            .containing(.staticText, identifier: "소녀와 거미")
+            .element
+            .exists
+        XCTAssertTrue(existsCell, "Title이 표시된 Cell이 존재한다")
+    }
+
+    func test_영화가_즐겨찾기_되어있지_않으면 () {
+        let existsCell = app.collectionViews
+            .cells
+            .containing(.staticText, identifier: "007")
+            .element
+            .exists
+        XCTAssertFalse(existsCell, "Title이 표시된 Cell이 존재하지 않는다")
+    }
 }
